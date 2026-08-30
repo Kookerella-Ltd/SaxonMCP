@@ -46,7 +46,26 @@ src/SaxonMcp/
 ## Build & run
 
 Requires the .NET 8 SDK (or newer; the project targets `net8.0`, which is what
-SaxonCS-HE ships for).
+SaxonCS-HE ships for). The build itself is driven by [FAKE](https://fake.build/)
+(F# Make), pinned as a local dotnet tool so the same command works identically
+on your machine and on CI — no separately-installed build tool needed.
+
+```bash
+dotnet tool restore   # first time only (installs fake-cli from .config/dotnet-tools.json)
+dotnet fake build            # Restore + Build (Release), the default
+dotnet fake build -t Clean   # wipe bin/obj under src/ and ./publish
+dotnet fake build -t Test    # Restore + Build + Test (no-op until a test project exists)
+dotnet fake build -t Publish # Restore + Build + Test + `dotnet publish` -> ./publish
+```
+
+Targets are defined in [`build.fsx`](build.fsx) and chained
+`Restore ==> Build ==> Test ==> Publish`; running a later target pulls in
+everything before it. `Test` auto-discovers any `*.Tests.fsproj`/`*.Tests.csproj`
+in the repo, so it starts working the moment a test project is added — nothing
+in the script needs to change. Any failed step exits non-zero, so it's safe to
+call directly from a CI job.
+
+Equivalent raw commands, if you'd rather not go through FAKE:
 
 ```bash
 dotnet build src/SaxonMcp
