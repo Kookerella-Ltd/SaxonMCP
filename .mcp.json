@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "saxon": {
+      "command": "dotnet",
+      "args": ["run", "--project", "src/SaxonMcp", "-c", "Release"]
+    }
+  }
+}
